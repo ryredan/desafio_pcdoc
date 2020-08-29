@@ -21,7 +21,8 @@ def post_paciente(request):
 def get_pacientes(request):
     pacientes = Paciente.objects.all().annotate(
         ordem_prio=Case(
-            When(prioridade__gt=0, then=Value(1)),
+            When(prioridade__gt=1, then=Value(2)),
+            When(prioridade=1, then=Value(1)),
             default=Value(0),
             output_field=IntegerField(),
         )).order_by('-ordem_prio')
