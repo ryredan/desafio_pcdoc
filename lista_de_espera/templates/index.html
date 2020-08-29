@@ -1,0 +1,106 @@
+{% load static %}
+<html>
+    <head>
+        <title>Lista de Espera</title>
+        <script src="{% static 'js/jquery-3.5.1.js' %}"></script>
+        {% block javascript %}
+        <script>
+            var pacientesData = {};
+            function getPatientData() {
+                $.ajax({
+                    type: 'GET',
+                    url: "{% url 'get_pacientes' %}",
+                    async: false,
+                    success: function (response){
+                        var pacientes = JSON.parse(response["pacientes"]);
+                        pacientesData = pacientes;
+                        console.log(pacientesData);
+                    }
+                });
+            }
+
+            function updateTable(){
+                getPatientData();
+                $('#paciente-table tbody').replaceWith(construirTabelaPacientes(pacientesData));
+            }
+
+            function construirTabelaPacientes(pacientes){
+                var content = '<tbody>';
+                for(i = 0; i < pacientes["length"]; i++){
+                    content += '<tr><td>' + pacientes[i]["fields"].nome + '</td>';
+                    if (i == 0){
+                        content += '<td><button id="remover-paciente-button">Atendido</button></td>';
+                    }
+                    content += '</tr>'
+                }
+                content += '</tbody>';
+                return content;
+            }
+
+            $(document).ready(function(){
+                updateTable();
+                $("#paciente-form").submit(function (e) {
+                    e.preventDefault();
+                    var serializedData = $(this).serialize();
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'post_paciente' %}",
+                        data: serializedData,
+                        success: function (response) {
+                            $("#paciente-form").trigger('reset');
+                            $(document).trigger('change');
+                        }
+                    })
+                })
+                $(document).on('click', '#remover-paciente-button', function(){
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'delete_paciente' %}",
+                        data: {
+                            'pk': pacientesData[0].pk,
+                            'csrfmiddlewaretoken': "{{ csrf_token }}"
+                        },
+                        success: function(response){
+                            $(document).trigger('change');
+                        },
+                        error: function(response) {
+                            alert('Erro');
+                        }
+                    })
+                })
+                $(document).on('change', function(){
+                    updateTable();
+                })
+            });
+        </script>
+        {% endblock %}
+    </head>
+
+    <body>
+        <div style="display: inline;">
+            <form id="paciente-form">
+                {% csrf_token %}
+                {% for field in form %}
+                    <label>{{field.label}}</label>
+                    {{field}}
+                {% endfor %}
+                <input type="submit" id="inserir" value="Inserir na Fila">
+            </form>
+
+        </div>
+        <div>
+            <table id="paciente-table">
+                <thead>
+                    <tr>
+                        <td>Nome</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Place Holder</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>
