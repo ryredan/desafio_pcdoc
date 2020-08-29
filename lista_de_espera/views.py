@@ -3,7 +3,6 @@ from django.core import serializers
 from django.http import JsonResponse, HttpResponse
 from .forms import PacienteForm
 from .models import Paciente
-from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Case, When, Value, IntegerField
 
 def index(request):

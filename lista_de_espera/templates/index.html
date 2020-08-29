@@ -6,7 +6,7 @@
         {% block javascript %}
         <script>
             var pacientesData = {};
-            function getPatientData() {
+            function getPacienteData() {
                 $.ajax({
                     type: 'GET',
                     url: "{% url 'get_pacientes' %}",
@@ -14,13 +14,12 @@
                     success: function (response){
                         var pacientes = JSON.parse(response["pacientes"]);
                         pacientesData = pacientes;
-                        console.log(pacientesData);
                     }
                 });
             }
 
-            function updateTable(){
-                getPatientData();
+            function atualizarTabela(){
+                getPacienteData();
                 $('#paciente-table tbody').replaceWith(construirTabelaPacientes(pacientesData));
             }
 
@@ -38,7 +37,7 @@
             }
 
             $(document).ready(function(){
-                updateTable();
+                atualizarTabela();
                 $("#paciente-form").submit(function (e) {
                     e.preventDefault();
                     var serializedData = $(this).serialize();
@@ -69,7 +68,7 @@
                     })
                 })
                 $(document).on('change', function(){
-                    updateTable();
+                    atualizarTabela();
                 })
             });
         </script>
@@ -96,9 +95,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Place Holder</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
